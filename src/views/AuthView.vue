@@ -1,8 +1,8 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter }      from 'vue-router'
-import { useAuthStore }   from '../stores/auth.js'
-import { useNotifStore }  from '../stores/notif.js'
+import { useAuthStore }   from '../stores/auth'
+import { useNotifStore }  from '../stores/notif'
 
 const router = useRouter()
 const auth   = useAuthStore()

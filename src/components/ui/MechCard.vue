@@ -1,7 +1,10 @@
-<script setup>
-defineProps({
-  hot:     { type: Boolean, default: false },
-  padding: { type: String,  default: 'p-6' },
+<script setup lang="ts">
+withDefaults(defineProps<{
+  hot?:     boolean
+  padding?: string
+}>(), {
+  hot:     false,
+  padding: 'p-6',
 })
 </script>
 
@@ -13,7 +16,6 @@ defineProps({
       padding,
     ]"
   >
-    <!-- Top-right corner accent -->
     <div
       class="absolute top-0 right-0 w-0 h-0 pointer-events-none"
       style="border-top: 12px solid var(--color-orange); border-left: 12px solid transparent"

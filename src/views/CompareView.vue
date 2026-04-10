@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useNotifStore } from '../stores/notif.js'
+import { useNotifStore } from '../stores/notif'
 import ScoreRing  from '../components/ui/ScoreRing.vue'
 import MechCard   from '../components/ui/MechCard.vue'
 import MechBadge  from '../components/ui/MechBadge.vue'

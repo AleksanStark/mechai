@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref }      from 'vue'
 import { useRouter } from 'vue-router'
-import { useScan }  from '../composables/useScan.js'
+import { useScan }  from '../composables/useScan'
 import MechCard     from '../components/ui/MechCard.vue'
 import MechBadge    from '../components/ui/MechBadge.vue'
 

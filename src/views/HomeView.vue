@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import TheTicker      from '../components/TheTicker.vue'
 import HeroSection    from '../components/HeroSection.vue'
 import ScanDemo       from '../components/ScanDemo.vue'

@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useFleetStore } from '../stores/fleet.js'
-import { useNotifStore } from '../stores/notif.js'
+import { useFleetStore } from '../stores/fleet'
+import { useNotifStore } from '../stores/notif'
 import MechCard  from '../components/ui/MechCard.vue'
 import MechBadge from '../components/ui/MechBadge.vue'
 import ScoreRing from '../components/ui/ScoreRing.vue'

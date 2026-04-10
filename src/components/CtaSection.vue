@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 const trustItems = [
   'SOC 2 Compliant',
   'GDPR Ready',

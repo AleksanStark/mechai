@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 const stats = [
   { n: '98.4%', l: 'Detection Accuracy' },
   { n: '3.2s',  l: 'Avg. Scan Time'     },
