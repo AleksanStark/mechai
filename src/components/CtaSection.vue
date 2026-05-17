@@ -1,77 +1,134 @@
 <script setup lang="ts">
-const trustItems = [
-  'SOC 2 Compliant',
-  'GDPR Ready',
-  'No Card Required',
-  'Cancel Anytime',
+interface TrustBadge {
+  label: string
+}
+
+const trustBadges: TrustBadge[] = [
+  { label: 'SOC 2 Compliant' },
+  { label: 'GDPR Ready' },
+  { label: 'No Card Required' },
+  { label: 'Cancel Anytime' },
 ]
 </script>
 
 <template>
-  <section
-    class="relative py-28 px-6 lg:px-[60px] text-center overflow-hidden"
-  >
-    <!-- Desert glow -->
-    <div
-      class="absolute inset-0 pointer-events-none"
-      style="background: radial-gradient(ellipse at 50% 110%, rgba(200,80,20,.12), transparent 65%)"
-    />
+  <section class="cta">
+    <div class="cta-glow"></div>
 
-    <div class="relative z-10">
-      <!-- Label -->
-      <div class="font-mono-tech text-[10px] tracking-[.28em] uppercase text-cyan mb-7">
-        // Ready, Sheriff?
-      </div>
+    <div class="cta-inner">
+      <div class="s-label">// Ready, Sheriff?</div>
 
-      <!-- Wanted Poster Frame -->
-      <div class="inline-block border-[3px] border-double border-orange-dim p-1.5 mb-10">
-        <div class="border border-orange-dim px-12 lg:px-20 py-11">
-          <h2
-            class="text-cream"
-            style="font-size: clamp(34px, 5.5vw, 66px); line-height: 1.05"
-          >
-            Dead or Alive —<br/>Every Defect
+      <div class="wanted-frame">
+        <div class="wanted-in">
+          <h2 class="s-heading" style="font-size: clamp(34px, 5.5vw, 66px)">
+            Dead or Alive —<br />Every Defect
           </h2>
         </div>
       </div>
 
-      <!-- Sub -->
-      <p class="font-barlow-body text-[17px] leading-[1.65] text-cream-dim max-w-[480px] mx-auto mb-10">
+      <p class="cta-sub">
         Stop paying for hidden problems. Every vehicle inspection starts with the full truth.
       </p>
 
-      <!-- CTAs -->
-      <div class="flex flex-wrap items-center justify-center gap-3.5">
-        <button
-          class="font-mono-tech text-[13px] tracking-[.15em] uppercase font-bold
-                 px-10 py-4 clip-btn-lg
-                 bg-orange text-bg-deep hover:bg-amber-w transition-colors cursor-pointer
-                 flex items-center gap-2"
-        >
-          <span>⬡</span> Scan Your First Car Free
-        </button>
-        <button
-          class="font-mono-tech text-[13px] tracking-[.15em] uppercase
-                 px-10 py-4 clip-btn-lg
-                 bg-transparent border border-cyan-dim text-cyan
-                 hover:bg-cyan/10 transition-colors cursor-pointer
-                 flex items-center gap-2"
-        >
-          <span>◈</span> Book a Demo
-        </button>
+      <div class="cta-actions">
+        <button class="btn btn-primary btn-lg">⬡ Scan Your First Car Free</button>
+        <button class="btn btn-outline btn-lg">◈ Book a Demo</button>
       </div>
 
-      <!-- Trust row -->
-      <div class="flex flex-wrap items-center justify-center gap-7 mt-11">
-        <div
-          v-for="item in trustItems"
-          :key="item"
-          class="flex items-center gap-2 font-mono-tech text-[9.5px] tracking-[.15em] uppercase text-tan"
+      <div class="trust-row">
+        <span
+          v-for="badge in trustBadges"
+          :key="badge.label"
+          class="trust"
         >
-          <span class="w-1.5 h-1.5 bg-cyan flex-shrink-0" />
-          {{ item }}
-        </div>
+          {{ badge.label }}
+        </span>
       </div>
     </div>
   </section>
 </template>
+
+<style scoped>
+.cta {
+  padding: 120px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 110%,
+    rgba(200, 80, 20, 0.12),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.cta-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.wanted-frame {
+  border: 3px double var(--orange-dim);
+  padding: 5px;
+  display: inline-block;
+  margin: 28px auto;
+}
+
+.wanted-in {
+  border: 1px solid var(--orange-dim);
+  padding: 44px 80px;
+}
+
+.cta-sub {
+  font-family: 'Barlow', sans-serif;
+  font-size: 17px;
+  color: var(--cream-dim);
+  max-width: 480px;
+  margin: 0 auto 40px;
+  line-height: 1.65;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.trust-row {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-top: 44px;
+  flex-wrap: wrap;
+}
+
+.trust {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--tan);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trust::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  background: var(--cyan);
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .cta        { padding: 60px 20px; }
+  .wanted-in  { padding: 28px 20px; }
+  .cta-actions { flex-direction: column; align-items: center; }
+}
+</style>

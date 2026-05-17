@@ -1,25 +1,35 @@
 <script setup lang="ts">
-const plans = [
+type ButtonVariant = 'primary' | 'outline'
+
+interface PricingPlan {
+  tier: string
+  price: number
+  period: string
+  features: string[]
+  isPopular: boolean
+  buttonText: string
+  buttonVariant: ButtonVariant
+}
+
+const plans: PricingPlan[] = [
   {
     tier: '// Scout',
-    price: '29',
+    price: 29,
     period: 'per month · billed monthly',
-    hot: false,
     features: [
       '50 scans / month',
       'Basic defect detection',
       'PDF reports',
       'Email support',
     ],
-    cta: 'Start Free Trial',
-    ctaStyle: 'outline',
+    isPopular: false,
+    buttonText: 'Start Free Trial',
+    buttonVariant: 'outline',
   },
   {
     tier: '// Marshal',
-    price: '99',
+    price: 99,
     period: 'per month · billed monthly',
-    hot: true,
-    badge: 'Most Popular',
     features: [
       '500 scans / month',
       'Full defect + rust detection',
@@ -28,100 +38,171 @@ const plans = [
       'API access (10k calls)',
       'Priority support',
     ],
-    cta: 'Get Marshal Plan',
-    ctaStyle: 'solid',
+    isPopular: true,
+    buttonText: 'Get Marshal Plan',
+    buttonVariant: 'primary',
   },
   {
     tier: '// Sheriff',
-    price: '349',
+    price: 349,
     period: 'per month · billed monthly',
-    hot: false,
     features: [
       'Unlimited scans',
-      'Fleet management dashboard',
+      'Fleet management',
       'White-label reports',
-      'Full API + webhooks',
+      'Full API access',
       'Custom AI fine-tuning',
       'Dedicated support',
     ],
-    cta: 'Contact Sales',
-    ctaStyle: 'outline',
+    isPopular: false,
+    buttonText: 'Contact Sales',
+    buttonVariant: 'outline',
   },
 ]
 </script>
 
 <template>
-  <section id="pricing" class="py-24 px-6 lg:px-[60px]">
-
-    <!-- Header -->
-    <div class="text-center">
-      <div class="font-mono-tech text-[10px] tracking-[.28em] uppercase text-cyan mb-3">
-        // Choose Your Badge
-      </div>
-      <h2 class="text-cream" style="font-size: clamp(28px, 4vw, 52px)">Name Your Bounty</h2>
+  <section class="pricing">
+    <div class="section-head">
+      <div class="s-label">// Choose Your Badge</div>
+      <h2 class="s-heading">Name Your Bounty</h2>
     </div>
 
-    <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-px max-w-[980px] mx-auto mt-16">
+    <div class="price-grid">
       <div
         v-for="plan in plans"
         :key="plan.tier"
-        class="relative flex flex-col p-9"
-        :class="plan.hot
-          ? 'bg-bg-card2 border border-orange'
-          : 'bg-bg-card border border-transparent'"
+        class="p-card"
+        :class="{ hot: plan.isPopular }"
       >
-        <!-- Popular Badge -->
-        <div
-          v-if="plan.badge"
-          class="absolute -top-px left-1/2 -translate-x-1/2
-                 font-mono-tech text-[9px] tracking-[.15em] uppercase
-                 bg-orange text-bg-deep px-5 py-1"
-        >{{ plan.badge }}</div>
+        <div v-if="plan.isPopular" class="p-badge">Most Popular</div>
 
-        <!-- Tier label -->
-        <div class="font-mono-tech text-[10px] tracking-[.22em] uppercase text-tan mb-3.5">
-          {{ plan.tier }}
+        <div class="p-tier">{{ plan.tier }}</div>
+
+        <div class="p-price">
+          <sup>$</sup>{{ plan.price }}
         </div>
 
-        <!-- Price -->
-        <div class="font-rye text-[52px] text-cream leading-none">
-          <sup class="font-barlow-cond text-[22px] align-super">$</sup>{{ plan.price }}
-        </div>
-        <div class="font-barlow-body text-[13px] text-tan mt-1 mb-7">{{ plan.period }}</div>
+        <div class="p-period">{{ plan.period }}</div>
 
-        <!-- Features -->
-        <ul class="flex flex-col gap-2.5 mb-7 flex-1">
-          <li
-            v-for="f in plan.features"
-            :key="f"
-            class="font-barlow-body text-sm text-cream-dim flex items-center gap-2.5"
-          >
-            <span class="text-orange text-lg leading-none">›</span>
-            {{ f }}
+        <ul class="p-list">
+          <li v-for="feature in plan.features" :key="feature">
+            {{ feature }}
           </li>
         </ul>
 
-        <!-- CTA -->
         <button
-          v-if="plan.ctaStyle === 'solid'"
-          class="font-mono-tech text-[12px] tracking-[.15em] uppercase font-bold
-                 w-full py-3.5 clip-btn text-bg-deep bg-orange
-                 hover:bg-amber-w transition-colors cursor-pointer"
-        >{{ plan.cta }}</button>
-        <button
-          v-else
-          class="font-mono-tech text-[12px] tracking-[.15em] uppercase
-                 w-full py-3.5 clip-btn text-cyan
-                 bg-transparent border border-cyan-dim
-                 hover:bg-cyan/10 transition-colors cursor-pointer"
-        >{{ plan.cta }}</button>
+          class="btn"
+          :class="plan.buttonVariant === 'primary' ? 'btn-primary' : 'btn-outline'"
+          style="width: 100%; justify-content: center"
+        >
+          {{ plan.buttonText }}
+        </button>
       </div>
     </div>
-
-    <!-- Fine print -->
-    <p class="text-center font-mono-tech text-[9px] tracking-[.14em] text-tan mt-8">
-      ALL PLANS INCLUDE 14-DAY FREE TRIAL · NO CREDIT CARD REQUIRED · CANCEL ANYTIME
-    </p>
   </section>
 </template>
+
+<style scoped>
+.pricing {
+  padding: 100px 60px;
+}
+
+.section-head {
+  text-align: center;
+}
+
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  max-width: 980px;
+  margin: 64px auto 0;
+}
+
+.p-card {
+  background: var(--bg-card);
+  padding: 38px 30px;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.p-card.hot {
+  background: var(--bg-card2);
+  border: 1px solid var(--orange);
+}
+
+.p-badge {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--orange);
+  color: var(--bg-deep);
+  padding: 4px 18px;
+  white-space: nowrap;
+}
+
+.p-tier {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tan);
+  margin-bottom: 14px;
+}
+
+.p-price {
+  font-family: 'Rye', serif;
+  font-size: 52px;
+  color: var(--cream);
+  line-height: 1;
+}
+
+.p-price sup {
+  font-size: 22px;
+  font-family: 'Barlow Condensed', sans-serif;
+  vertical-align: super;
+}
+
+.p-period {
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px;
+  color: var(--tan);
+  margin-bottom: 28px;
+  margin-top: 4px;
+}
+
+.p-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.p-list li {
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  color: var(--cream-dim);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.p-list li::before {
+  content: '›';
+  color: var(--orange);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .pricing    { padding: 60px 20px; }
+  .price-grid { grid-template-columns: 1fr; }
+}
+</style>

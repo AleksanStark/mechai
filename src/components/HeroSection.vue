@@ -1,139 +1,272 @@
 <script setup lang="ts">
-const stats = [
-  { n: '98.4%', l: 'Detection Accuracy' },
-  { n: '3.2s',  l: 'Avg. Scan Time'     },
-  { n: '200+',  l: 'Defect Categories'  },
-  { n: '1.2M',  l: 'Vehicles Inspected' },
+interface HeroStat {
+  value: string
+  label: string
+}
+
+const stats: HeroStat[] = [
+  { value: '98.4%', label: 'Detection Accuracy' },
+  { value: '3.2s',  label: 'Avg. Scan Time' },
+  { value: '200+',  label: 'Defect Categories' },
+  { value: '1.2M',  label: 'Vehicles Inspected' },
 ]
 
-const crosses = [
-  { top: '22%', left: '42%', delay: '0s'    },
-  { top: '55%', left: '62%', delay: '1.1s'  },
-  { bottom: '18%', left: '48%', delay: '2s' },
-  { top: '35%', right: '28%', delay: '.6s'  },
+interface PixelCross {
+  top?: string
+  bottom?: string
+  left?: string
+  right?: string
+}
+
+const pixelCrosses: PixelCross[] = [
+  { top: '22%', left: '42%' },
+  { top: '55%', left: '62%' },
+  { bottom: '18%', left: '48%' },
+  { top: '35%', right: '28%' },
 ]
 </script>
 
 <template>
-  <section class="relative min-h-screen flex items-center px-6 lg:px-[60px] pt-16 pb-20 overflow-hidden">
+  <section class="hero">
+    <!-- Grid overlay -->
+    <div class="g-grid"></div>
 
-    <!-- Grid Overlay -->
-    <div class="absolute inset-0 grid-overlay pointer-events-none" />
+    <!-- Desert glow -->
+    <div class="hero-desert"></div>
 
-    <!-- Desert gradient glow -->
-    <div
-      class="absolute bottom-0 left-0 right-0 h-[55%] pointer-events-none"
-      style="background: radial-gradient(ellipse at 50% 110%, rgba(210,80,20,.14) 0%, rgba(180,55,10,.07) 45%, transparent 70%)"
-    />
-
-    <!-- Horizontal scan lines -->
-    <div class="absolute inset-x-0 h-px animate-scan-v scan-line" />
-    <div class="absolute inset-x-0 h-px animate-scan-v scan-line" style="animation-delay: -2.5s;" />
+    <!-- Scan lines -->
+    <div class="scan-h"></div>
+    <div class="scan-h scan-h--delay"></div>
 
     <!-- Pixel crosses -->
     <span
-      v-for="(c, i) in crosses"
+      v-for="(cross, i) in pixelCrosses"
       :key="i"
-      class="absolute font-mono-tech text-sm text-orange animate-px-pulse pointer-events-none"
-      :style="{ ...c, animationDelay: c.delay }"
+      class="px-cross"
+      :style="cross"
     >+</span>
 
-    <!-- Left: Main content -->
-    <div class="relative z-10 max-w-[660px]">
+    <!-- Hero Content -->
+    <div class="hero-left">
+      <div class="eyebrow">MechVision AI · System v3.1 · Active</div>
 
-      <!-- Eyebrow -->
-      <div class="flex items-center gap-3 font-mono-tech text-[10px] tracking-[.3em] uppercase text-cyan mb-6">
-        <span class="w-7 h-px bg-cyan flex-shrink-0" />
-        MechVision AI · System v3.1 · Active
-      </div>
-
-      <!-- Headline -->
-      <h1 class="font-rye leading-[.95] text-cream"
-          style="font-size: clamp(52px, 7.5vw, 94px)">
+      <h1>
         No Car
-        <span class="block text-orange">Hides Its</span>
+        <span class="accent">Hides Its</span>
         Secrets
       </h1>
 
-      <!-- Body -->
-      <p class="font-barlow-body text-[17px] leading-[1.7] text-cream-dim mt-6 mb-10 max-w-[500px]">
+      <p class="hero-body">
         Upload a photo — our laser-eyed AI performs a full technical inspection in seconds.
         Rust, cracks, wear, and hidden damage don't stand a chance.
       </p>
 
-      <!-- CTAs -->
-      <div class="flex flex-wrap gap-3.5 items-center">
-        <RouterLink
-          to="/scan"
-          class="font-mono-tech text-[13px] tracking-[.15em] uppercase font-bold
-                 px-9 py-[15px] clip-btn-lg no-underline
-                 bg-orange text-bg-deep hover:bg-amber-w transition-colors
-                 flex items-center gap-2"
-        >
-          <span>⬡</span> Scan A Vehicle
-        </RouterLink>
-        <button
-          class="font-mono-tech text-[13px] tracking-[.15em] uppercase
-                 px-9 py-[15px] clip-btn-lg
-                 bg-transparent border border-cyan-dim text-cyan
-                 hover:bg-cyan/10 transition-colors cursor-pointer
-                 flex items-center gap-2"
-        >
-          <span>◈</span> Watch Demo
-        </button>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg">⬡ Scan A Vehicle</button>
+        <button class="btn btn-outline btn-lg">◈ Watch Demo</button>
       </div>
     </div>
 
-    <!-- Right: Stats -->
-    <div
-      class="absolute right-6 lg:right-[60px] top-1/2 -translate-y-1/2
-             z-10 flex flex-col gap-3
-             hidden lg:flex"
-    >
+    <!-- Stats Column -->
+    <div class="hero-stats">
       <div
         v-for="stat in stats"
-        :key="stat.n"
-        class="bg-bg-card border border-orange/22 clip-card relative px-6 py-4"
+        :key="stat.label"
+        class="stat-box"
       >
-        <!-- Corner accent -->
-        <div
-          class="absolute top-0 right-0 w-0 h-0"
-          style="border-top: 14px solid var(--color-orange); border-left: 14px solid transparent"
-        />
-        <div class="font-rye text-[38px] text-orange leading-none">{{ stat.n }}</div>
-        <div class="font-mono-tech text-[9px] tracking-[.22em] uppercase text-tan mt-1">{{ stat.l }}</div>
+        <div class="stat-corner"></div>
+        <div class="stat-n">{{ stat.value }}</div>
+        <div class="stat-l">{{ stat.label }}</div>
       </div>
     </div>
-
-    <!-- Mobile stats row -->
-    <div class="absolute bottom-6 left-6 right-6 grid grid-cols-2 gap-2 lg:hidden z-10">
-      <div
-        v-for="stat in stats"
-        :key="stat.n"
-        class="bg-bg-card border border-orange/22 px-4 py-3 clip-card relative"
-      >
-        <div
-          class="absolute top-0 right-0 w-0 h-0"
-          style="border-top: 12px solid var(--color-orange); border-left: 12px solid transparent"
-        />
-        <div class="font-rye text-2xl text-orange leading-none">{{ stat.n }}</div>
-        <div class="font-mono-tech text-[8px] tracking-[.15em] uppercase text-tan mt-0.5">{{ stat.l }}</div>
-      </div>
-    </div>
-
   </section>
 </template>
 
 <style scoped>
-.scan-line {
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 110px 60px 80px;
+  overflow: hidden;
+}
+
+.hero-desert {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background: radial-gradient(
+    ellipse at 50% 110%,
+    rgba(210, 80, 20, 0.14) 0%,
+    rgba(180, 55, 10, 0.07) 45%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Scan lines */
+.scan-h {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    var(--color-cyan) 30%,
-    rgba(0,216,255,.9) 50%,
-    var(--color-cyan) 70%,
+    var(--cyan) 30%,
+    rgba(0, 216, 255, 0.9) 50%,
+    var(--cyan) 70%,
     transparent 100%
   );
+  animation: scanV 5s linear infinite;
   opacity: 0;
+  pointer-events: none;
+}
+
+.scan-h--delay {
+  animation-delay: -2.5s;
+}
+
+@keyframes scanV {
+  0%   { top: 0%; opacity: 0; }
+  8%   { opacity: 0.35; }
+  92%  { opacity: 0.35; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Pixel crosses */
+.px-cross {
+  position: absolute;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  color: var(--orange);
+  opacity: 0.4;
+  animation: pxpulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pxpulse {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.6; }
+}
+
+/* Hero left */
+.hero-left {
+  position: relative;
+  z-index: 2;
+  max-width: 660px;
+}
+
+.eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--cyan);
+  flex-shrink: 0;
+}
+
+h1 {
+  font-family: 'Rye', serif;
+  font-size: clamp(50px, 7.5vw, 94px);
+  line-height: 0.95;
+  color: var(--cream);
+}
+
+.accent {
+  color: var(--orange);
+  display: block;
+}
+
+.hero-body {
+  font-family: 'Barlow', sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--cream-dim);
+  margin: 26px 0 40px;
+  max-width: 500px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* Stats */
+.hero-stats {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-box {
+  background: var(--bg-card);
+  border: 1px solid var(--b-warm);
+  padding: 18px 26px;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  position: relative;
+}
+
+.stat-corner {
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border-top: 14px solid var(--orange);
+  border-left: 14px solid transparent;
+}
+
+.stat-n {
+  font-family: 'Rye', serif;
+  font-size: 38px;
+  color: var(--orange);
+  line-height: 1;
+}
+
+.stat-l {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tan);
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    padding: 100px 20px 60px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-stats {
+    position: static;
+    transform: none;
+    margin-top: 40px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .stat-box {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 140px;
+  }
 }
 </style>
