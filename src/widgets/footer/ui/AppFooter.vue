@@ -1,17 +1,17 @@
 <script setup lang="ts">
 interface FooterLink {
-  label: string
-  href: string
+  label: string;
+  href: string;
 }
 
 const footerLinks: FooterLink[] = [
-  { label: 'Privacy', href: '#' },
-  { label: 'Terms',   href: '#' },
-  { label: 'API Docs', href: '#' },
-  { label: 'Status',  href: '#' },
-]
+  { label: "Privacy", href: "#" },
+  { label: "Terms", href: "#" },
+  { label: "API Docs", href: "#" },
+  { label: "Status", href: "#" },
+];
 
-const currentYear: number = new Date().getFullYear()
+const currentYear: number = new Date().getFullYear();
 </script>
 
 <template>
@@ -54,7 +54,7 @@ const currentYear: number = new Date().getFullYear()
 }
 
 .logo-txt {
-  font-family: 'Rye', serif;
+  font-family: "Rye", serif;
   font-size: 18px;
   letter-spacing: 0.05em;
   color: var(--cream);
@@ -65,13 +65,13 @@ const currentYear: number = new Date().getFullYear()
 }
 
 .version {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 9px;
   color: #4a6b4a;
 }
 
 .f-copy {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 10px;
   color: var(--tan);
   letter-spacing: 0.1em;
@@ -83,7 +83,7 @@ const currentYear: number = new Date().getFullYear()
 }
 
 .f-link {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 10px;
   color: var(--tan);
   text-decoration: none;

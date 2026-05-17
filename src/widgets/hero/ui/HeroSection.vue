@@ -1,29 +1,27 @@
 <script setup lang="ts">
+import type { CSSProperties } from "vue";
+import AppButton from "../../../shared/ui/AppButton.vue";
+
 interface HeroStat {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
 const stats: HeroStat[] = [
-  { value: '98.4%', label: 'Detection Accuracy' },
-  { value: '3.2s',  label: 'Avg. Scan Time' },
-  { value: '200+',  label: 'Defect Categories' },
-  { value: '1.2M',  label: 'Vehicles Inspected' },
-]
+  { value: "98.4%", label: "Detection Accuracy" },
+  { value: "3.2s", label: "Avg. Scan Time" },
+  { value: "200+", label: "Defect Categories" },
+  { value: "1.2M", label: "Vehicles Inspected" },
+];
 
-interface PixelCross {
-  top?: string
-  bottom?: string
-  left?: string
-  right?: string
-}
+type PixelCross = CSSProperties;
 
 const pixelCrosses: PixelCross[] = [
-  { top: '22%', left: '42%' },
-  { top: '55%', left: '62%' },
-  { bottom: '18%', left: '48%' },
-  { top: '35%', right: '28%' },
-]
+  { top: "22%", left: "42%" },
+  { top: "55%", left: "62%" },
+  { bottom: "18%", left: "48%" },
+  { top: "35%", right: "28%" },
+];
 </script>
 
 <template>
@@ -44,7 +42,8 @@ const pixelCrosses: PixelCross[] = [
       :key="i"
       class="px-cross"
       :style="cross"
-    >+</span>
+      >+</span
+    >
 
     <!-- Hero Content -->
     <div class="hero-left">
@@ -57,23 +56,20 @@ const pixelCrosses: PixelCross[] = [
       </h1>
 
       <p class="hero-body">
-        Upload a photo — our laser-eyed AI performs a full technical inspection in seconds.
-        Rust, cracks, wear, and hidden damage don't stand a chance.
+        Upload a photo — our laser-eyed AI performs a full technical inspection
+        in seconds. Rust, cracks, wear, and hidden damage don't stand a chance.
       </p>
 
       <div class="hero-actions">
-        <button class="btn btn-primary btn-lg">⬡ Scan A Vehicle</button>
-        <button class="btn btn-outline btn-lg">◈ Watch Demo</button>
+        <AppButton variant="primary" size="lg"> ⬡ Scan A Vehicle </AppButton>
+
+        <AppButton variant="outline" size="lg"> ◈ Watch Demo </AppButton>
       </div>
     </div>
 
     <!-- Stats Column -->
     <div class="hero-stats">
-      <div
-        v-for="stat in stats"
-        :key="stat.label"
-        class="stat-box"
-      >
+      <div v-for="stat in stats" :key="stat.label" class="stat-box">
         <div class="stat-corner"></div>
         <div class="stat-n">{{ stat.value }}</div>
         <div class="stat-l">{{ stat.label }}</div>
@@ -94,7 +90,9 @@ const pixelCrosses: PixelCross[] = [
 
 .hero-desert {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   height: 55%;
   background: radial-gradient(
     ellipse at 50% 110%,
@@ -108,7 +106,8 @@ const pixelCrosses: PixelCross[] = [
 /* Scan lines */
 .scan-h {
   position: absolute;
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   height: 1px;
   background: linear-gradient(
     90deg,
@@ -128,16 +127,26 @@ const pixelCrosses: PixelCross[] = [
 }
 
 @keyframes scanV {
-  0%   { top: 0%; opacity: 0; }
-  8%   { opacity: 0.35; }
-  92%  { opacity: 0.35; }
-  100% { top: 100%; opacity: 0; }
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.35;
+  }
+  92% {
+    opacity: 0.35;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
 }
 
 /* Pixel crosses */
 .px-cross {
   position: absolute;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 14px;
   color: var(--orange);
   opacity: 0.4;
@@ -146,8 +155,13 @@ const pixelCrosses: PixelCross[] = [
 }
 
 @keyframes pxpulse {
-  0%, 100% { opacity: 0.2; }
-  50%       { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* Hero left */
@@ -158,7 +172,7 @@ const pixelCrosses: PixelCross[] = [
 }
 
 .eyebrow {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 10px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -170,7 +184,7 @@ const pixelCrosses: PixelCross[] = [
 }
 
 .eyebrow::before {
-  content: '';
+  content: "";
   width: 28px;
   height: 1px;
   background: var(--cyan);
@@ -178,7 +192,7 @@ const pixelCrosses: PixelCross[] = [
 }
 
 h1 {
-  font-family: 'Rye', serif;
+  font-family: "Rye", serif;
   font-size: clamp(50px, 7.5vw, 94px);
   line-height: 0.95;
   color: var(--cream);
@@ -190,7 +204,7 @@ h1 {
 }
 
 .hero-body {
-  font-family: 'Barlow', sans-serif;
+  font-family: "Barlow", sans-serif;
   font-size: 17px;
   line-height: 1.7;
   color: var(--cream-dim);
@@ -220,27 +234,36 @@ h1 {
   background: var(--bg-card);
   border: 1px solid var(--b-warm);
   padding: 18px 26px;
-  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
   position: relative;
 }
 
 .stat-corner {
   position: absolute;
-  top: 0; right: 0;
-  width: 0; height: 0;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
   border-top: 14px solid var(--orange);
   border-left: 14px solid transparent;
 }
 
 .stat-n {
-  font-family: 'Rye', serif;
+  font-family: "Rye", serif;
   font-size: 38px;
   color: var(--orange);
   line-height: 1;
 }
 
 .stat-l {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 9px;
   letter-spacing: 0.22em;
   text-transform: uppercase;

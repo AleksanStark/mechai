@@ -1,64 +1,64 @@
 <script setup lang="ts">
-type ButtonVariant = 'primary' | 'outline'
+import AppButton from "../../../shared/ui/AppButton.vue";
 
 interface PricingPlan {
-  tier: string
-  price: number
-  period: string
-  features: string[]
-  isPopular: boolean
-  buttonText: string
-  buttonVariant: ButtonVariant
+  tier: string;
+  price: number;
+  period: string;
+  features: string[];
+  isPopular: boolean;
+  buttonText: string;
+  buttonVariant: "primary" | "outline";
 }
 
 const plans: PricingPlan[] = [
   {
-    tier: '// Scout',
+    tier: "// Scout",
     price: 29,
-    period: 'per month · billed monthly',
+    period: "per month · billed monthly",
     features: [
-      '50 scans / month',
-      'Basic defect detection',
-      'PDF reports',
-      'Email support',
+      "50 scans / month",
+      "Basic defect detection",
+      "PDF reports",
+      "Email support",
     ],
     isPopular: false,
-    buttonText: 'Start Free Trial',
-    buttonVariant: 'outline',
+    buttonText: "Start Free Trial",
+    buttonVariant: "outline",
   },
   {
-    tier: '// Marshal',
+    tier: "// Marshal",
     price: 99,
-    period: 'per month · billed monthly',
+    period: "per month · billed monthly",
     features: [
-      '500 scans / month',
-      'Full defect + rust detection',
-      'VIN + history check',
-      'Price intelligence',
-      'API access (10k calls)',
-      'Priority support',
+      "500 scans / month",
+      "Full defect + rust detection",
+      "VIN + history check",
+      "Price intelligence",
+      "API access (10k calls)",
+      "Priority support",
     ],
     isPopular: true,
-    buttonText: 'Get Marshal Plan',
-    buttonVariant: 'primary',
+    buttonText: "Get Marshal Plan",
+    buttonVariant: "primary",
   },
   {
-    tier: '// Sheriff',
+    tier: "// Sheriff",
     price: 349,
-    period: 'per month · billed monthly',
+    period: "per month · billed monthly",
     features: [
-      'Unlimited scans',
-      'Fleet management',
-      'White-label reports',
-      'Full API access',
-      'Custom AI fine-tuning',
-      'Dedicated support',
+      "Unlimited scans",
+      "Fleet management",
+      "White-label reports",
+      "Full API access",
+      "Custom AI fine-tuning",
+      "Dedicated support",
     ],
     isPopular: false,
-    buttonText: 'Contact Sales',
-    buttonVariant: 'outline',
+    buttonText: "Contact Sales",
+    buttonVariant: "outline",
   },
-]
+];
 </script>
 
 <template>
@@ -79,9 +79,7 @@ const plans: PricingPlan[] = [
 
         <div class="p-tier">{{ plan.tier }}</div>
 
-        <div class="p-price">
-          <sup>$</sup>{{ plan.price }}
-        </div>
+        <div class="p-price"><sup>$</sup>{{ plan.price }}</div>
 
         <div class="p-period">{{ plan.period }}</div>
 
@@ -91,13 +89,9 @@ const plans: PricingPlan[] = [
           </li>
         </ul>
 
-        <button
-          class="btn"
-          :class="plan.buttonVariant === 'primary' ? 'btn-primary' : 'btn-outline'"
-          style="width: 100%; justify-content: center"
-        >
+        <AppButton :variant="plan.buttonVariant" size="md" fullWidth>
           {{ plan.buttonText }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </section>
@@ -137,7 +131,7 @@ const plans: PricingPlan[] = [
   top: -1px;
   left: 50%;
   transform: translateX(-50%);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 9px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -148,7 +142,7 @@ const plans: PricingPlan[] = [
 }
 
 .p-tier {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -157,7 +151,7 @@ const plans: PricingPlan[] = [
 }
 
 .p-price {
-  font-family: 'Rye', serif;
+  font-family: "Rye", serif;
   font-size: 52px;
   color: var(--cream);
   line-height: 1;
@@ -165,12 +159,12 @@ const plans: PricingPlan[] = [
 
 .p-price sup {
   font-size: 22px;
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: "Barlow Condensed", sans-serif;
   vertical-align: super;
 }
 
 .p-period {
-  font-family: 'Barlow', sans-serif;
+  font-family: "Barlow", sans-serif;
   font-size: 13px;
   color: var(--tan);
   margin-bottom: 28px;
@@ -186,7 +180,7 @@ const plans: PricingPlan[] = [
 }
 
 .p-list li {
-  font-family: 'Barlow', sans-serif;
+  font-family: "Barlow", sans-serif;
   font-size: 14px;
   color: var(--cream-dim);
   display: flex;
@@ -195,14 +189,18 @@ const plans: PricingPlan[] = [
 }
 
 .p-list li::before {
-  content: '›';
+  content: "›";
   color: var(--orange);
   font-size: 18px;
   flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
-  .pricing    { padding: 60px 20px; }
-  .price-grid { grid-template-columns: 1fr; }
+  .pricing {
+    padding: 60px 20px;
+  }
+  .price-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
