@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import AppButton from "../../../shared/ui/AppButton.vue";
+
 interface TrustBadge {
-  label: string
+  label: string;
 }
 
 const trustBadges: TrustBadge[] = [
-  { label: 'SOC 2 Compliant' },
-  { label: 'GDPR Ready' },
-  { label: 'No Card Required' },
-  { label: 'Cancel Anytime' },
-]
+  { label: "SOC 2 Compliant" },
+  { label: "GDPR Ready" },
+  { label: "No Card Required" },
+  { label: "Cancel Anytime" },
+];
 </script>
 
 <template>
@@ -27,20 +29,20 @@ const trustBadges: TrustBadge[] = [
       </div>
 
       <p class="cta-sub">
-        Stop paying for hidden problems. Every vehicle inspection starts with the full truth.
+        Stop paying for hidden problems. Every vehicle inspection starts with
+        the full truth.
       </p>
 
       <div class="cta-actions">
-        <button class="btn btn-primary btn-lg">⬡ Scan Your First Car Free</button>
-        <button class="btn btn-outline btn-lg">◈ Book a Demo</button>
+        <AppButton variant="primary" size="lg">
+          ⬡ Scan Your First Car Free
+        </AppButton>
+
+        <AppButton variant="outline" size="lg"> ◈ Book a Demo </AppButton>
       </div>
 
       <div class="trust-row">
-        <span
-          v-for="badge in trustBadges"
-          :key="badge.label"
-          class="trust"
-        >
+        <span v-for="badge in trustBadges" :key="badge.label" class="trust">
           {{ badge.label }}
         </span>
       </div>
@@ -85,7 +87,7 @@ const trustBadges: TrustBadge[] = [
 }
 
 .cta-sub {
-  font-family: 'Barlow', sans-serif;
+  font-family: "Barlow", sans-serif;
   font-size: 17px;
   color: var(--cream-dim);
   max-width: 480px;
@@ -108,7 +110,7 @@ const trustBadges: TrustBadge[] = [
 }
 
 .trust {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 9.5px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -119,7 +121,7 @@ const trustBadges: TrustBadge[] = [
 }
 
 .trust::before {
-  content: '';
+  content: "";
   width: 5px;
   height: 5px;
   background: var(--cyan);
@@ -127,8 +129,15 @@ const trustBadges: TrustBadge[] = [
 }
 
 @media (max-width: 900px) {
-  .cta        { padding: 60px 20px; }
-  .wanted-in  { padding: 28px 20px; }
-  .cta-actions { flex-direction: column; align-items: center; }
+  .cta {
+    padding: 60px 20px;
+  }
+  .wanted-in {
+    padding: 28px 20px;
+  }
+  .cta-actions {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 </style>

@@ -1,30 +1,43 @@
 <script setup lang="ts">
 interface NavLink {
-  label: string
-  href: string
+  label: string;
+  href: string;
 }
 
 const navLinks: NavLink[] = [
-  { label: '// Scan', href: '#' },
-  { label: '// Features', href: '#' },
-  { label: '// Pricing', href: '#' },
-  { label: '// API', href: '#' },
-  { label: '// Docs', href: '#' },
-]
+  { label: "// Scan", href: "#" },
+  { label: "// Features", href: "#" },
+  { label: "// Pricing", href: "#" },
+  { label: "// API", href: "#" },
+  { label: "// Docs", href: "#" },
+];
 </script>
 
 <template>
   <header class="site-header">
     <!-- Logo -->
     <div class="logo-wrap">
-      <svg class="logo-mark" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        class="logo-mark"
+        viewBox="0 0 34 34"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <rect x="5" y="18" width="24" height="4" rx="1" fill="#E8792A" />
         <rect x="9" y="11" width="16" height="9" rx="1" fill="#B87840" />
         <rect x="9" y="15" width="16" height="2" fill="#C46030" opacity=".8" />
         <rect x="13" y="13" width="6" height="5" rx="1" fill="#3D5F7A" />
         <circle cx="16" cy="15.5" r="2.5" fill="#FF2222" />
         <circle cx="16" cy="15.5" r="1.2" fill="#FF6666" />
-        <rect x="19" y="15" width="10" height="1.5" fill="#FF3333" opacity=".8" rx=".5" />
+        <rect
+          x="19"
+          y="15"
+          width="10"
+          height="1.5"
+          fill="#FF3333"
+          opacity=".8"
+          rx=".5"
+        />
         <circle cx="29" cy="15.75" r="1" fill="#FF5555" opacity=".6" />
       </svg>
       <span class="logo-txt">Mech<span>AI</span></span>
@@ -80,7 +93,7 @@ const navLinks: NavLink[] = [
 }
 
 .logo-txt {
-  font-family: 'Rye', serif;
+  font-family: "Rye", serif;
   font-size: 20px;
   letter-spacing: 0.05em;
   color: var(--cream);
@@ -97,7 +110,7 @@ const navLinks: NavLink[] = [
 }
 
 .nav-link {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: "Share Tech Mono", monospace;
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
