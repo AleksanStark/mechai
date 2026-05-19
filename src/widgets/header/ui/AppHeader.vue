@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
+
 interface NavLink {
   label: string;
   href: string;
 }
 
 const navLinks: NavLink[] = [
-  { label: "// Scan", href: "#" },
+  { label: "// Scan", href: "/scanChoice" },
   { label: "// Features", href: "#" },
   { label: "// Pricing", href: "#" },
   { label: "// API", href: "#" },
@@ -45,14 +47,14 @@ const navLinks: NavLink[] = [
 
     <!-- Navigation -->
     <nav class="main-nav">
-      <a
+      <RouterLink
         v-for="link in navLinks"
         :key="link.label"
-        :href="link.href"
+        :to="link.href"
         class="nav-link"
       >
         {{ link.label }}
-      </a>
+      </RouterLink>
     </nav>
 
     <!-- CTA Buttons -->
