@@ -8,6 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "dompurify": "^3.4.5",
+    "marked": "^18.0.4",
+    "openai": "^6.38.0",
     "vue": "^3.4.0",
     "vue-router": "^5.0.7"
   },
