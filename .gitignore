@@ -1,17 +1,70 @@
+# =========================
+# System files
+# =========================
 .DS_Store
+Thumbs.db
+
+# =========================
+# Dependencies
+# =========================
 node_modules
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# =========================
+# Logs
+# =========================
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Build outputs
+# =========================
+dist
+build
+out
+temp
+coverage
+types/v3-generated.d.ts
+
+# =========================
+# Environment variables (IMPORTANT)
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode
+.idea
+
+# =========================
+# Project-specific ignores
+# =========================
 explorations
 TODOs.md
 RELEASE_NOTE*.md
+
+# =========================
+# Vue / Vite
+# =========================
+.vite
+.cache
+
+# =========================
+# Server renderer (if used)
+# =========================
 packages/server-renderer/basic.js
 packages/server-renderer/build.dev.js
 packages/server-renderer/build.prod.js
 packages/server-renderer/server-plugin.js
 packages/server-renderer/client-plugin.js
+
 packages/template-compiler/build.js
 packages/template-compiler/browser.js
-.vscode
-dist
-temp
-types/v3-generated.d.ts
