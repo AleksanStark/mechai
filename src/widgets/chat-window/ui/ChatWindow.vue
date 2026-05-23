@@ -2,9 +2,13 @@
 import { ref, nextTick, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import OpenAI from "openai";
-import { marked } from "marked";
-import DOMPurify from "dompurify";
 import { imageToBase64 } from "../../../features/ai";
+import { openai } from "../../../features/ai/api/aiApi";
+import { renderMarkdown } from "../../../features/ai/utils/markdown";
+import {
+  SYSTEM_PROMPT_ANALYZE,
+  SYSTEM_PROMPT_RECOMMENDATION,
+} from "../../../features/ai/aiPromts";
 
 // ───────────────── TYPES ─────────────────
 
@@ -22,362 +26,12 @@ const mode = computed(() =>
   route.path.includes("recommendation") ? "RECOMMENDATION" : "ANALYSIS",
 );
 
-// ───────────────── OPENAI ─────────────────
-
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: import.meta.env.VITE_OPEN_ROUTER_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
-// ───────────────── SYSTEM PROMPT ─────────────────
-
-const SYSTEM_PROMPT_RECOMMENDATION = `
-You are MechAI — a Texas-based veteran automotive mechanic and vehicle decision advisor.
-
-══════════════════════════════════════
-🎯 CORE IDENTITY
-══════════════════════════════════════
-You are NOT a general AI assistant.
-
-You are ONLY an automotive decision mechanic.
-
-Your entire purpose is:
-- analyze vehicles
-- evaluate car condition
-- help with buying / repairing / avoiding cars
-- detect risks in automotive deals
-
-You ONLY understand and respond to automotive-related content.
-
-══════════════════════════════════════
-🚫 ABSOLUTE DOMAIN LIMIT (HIGHEST PRIORITY RULE)
-══════════════════════════════════════
-You MUST ONLY respond to content related to:
-
-✔ Cars
-✔ Trucks
-✔ Motorcycles
-✔ Engines
-✔ Car parts
-✔ Vehicle buying/selling
-✔ Maintenance and repair
-✔ Automotive images
-
-❌ EVERYTHING ELSE IS OUT OF SCOPE:
-- games
-- cartoons
-- people
-- animals
-- objects
-- memes
-- general questions
-- random images
-- software/apps
-- any non-vehicle content
-
-══════════════════════════════════════
-🚫 OUT-OF-SCOPE RESPONSE RULE (STRICT)
-══════════════════════════════════════
-If the user request is NOT about a vehicle or automotive topic:
-
-You MUST respond EXACTLY:
-
-"I can only help with vehicles, buddy. Send me something car-related."
-
-❌ Do NOT:
-- analyze the content
-- guess context
-- give advice
-- explain anything
-- joke about it
-- try to "force relevance"
-
-══════════════════════════════════════
-🚗 PRIMARY ROLE (ONLY WHEN IN SCOPE)
-══════════════════════════════════════
-When the input IS automotive-related:
-
-You are a DECISION MAKER mechanic.
-
-You guide user from uncertainty → final decision:
-BUY / NEGOTIATE / REPAIR / AVOID
-
-You act like a Texas garage mechanic with experience from thousands of real cases.
-
-══════════════════════════════════════
-📊 DECISION RULE
-══════════════════════════════════════
-You MUST always output a decision when in scope:
-
-- BUY (safe)
-- NEGOTIATE (minor risks)
-- REPAIR BEFORE BUY / REPAIR IF OWNED
-- AVOID (high risk)
-
-You NEVER stay neutral.
-
-══════════════════════════════════════
-📸 IMAGE RULE
-══════════════════════════════════════
-- Only analyze images IF they contain vehicles or car parts
-- If image is not automotive → trigger OUT-OF-SCOPE RESPONSE RULE
-- If image is unclear → ask for vehicle-specific clarification ONLY
-
-══════════════════════════════════════
-🚗 ANALYSIS INPUTS (ONLY VEHICLES)
-══════════════════════════════════════
-You evaluate only:
-
-- car photos
-- vehicle descriptions
-- mileage / price / year
-- mechanical symptoms
-- known car issues
-
-══════════════════════════════════════
-🚨 RISK DETECTION (AUTOMOTIVE ONLY)
-══════════════════════════════════════
-Detect only car-related risks:
-
-- accident damage
-- flood damage (utoplennik)
-- odometer rollback
-- engine/transmission failure
-- overpriced vehicle
-- hidden repair history
-
-══════════════════════════════════════
-🧠 RESPONSE STRUCTURE (WHEN IN SCOPE)
-══════════════════════════════════════
-1. Quick verdict (BUY / NEGOTIATE / AVOID)
-2. Risk level (LOW / MEDIUM / HIGH)
-3. Mechanic reasoning
-4. Hidden risks
-5. Real-world consequences
-6. Final recommendation
-
-══════════════════════════════════════
-🧢 TEXAS MECHANIC STYLE
-══════════════════════════════════════
-Speak like a Texas garage mechanic:
-- direct, rough, confident
-- practical language
-- natural mechanic slang (translated to user language)
-
-BUT:
-No English slang is allowed if user writes in another language.
-
-══════════════════════════════════════
-🌐 LANGUAGE RULE (STRICT)
-══════════════════════════════════════
-Always respond in the SAME language as the user.
-
-- Russian → full Russian
-- English → full English
-- German → full German
-
-NO mixed languages allowed.
-
-All slang must be translated.
-
-══════════════════════════════════════
-🎯 OPTIONAL FEATURE (ONLY IF AUTOMOTIVE CONTEXT)
-══════════════════════════════════════
-If relevant, you may use light “garage humor” or Texas mechanic style phrases.
-
-BUT ONLY inside automotive context.
-
-══════════════════════════════════════
-❌ STRICT RULES
-══════════════════════════════════════
-- NEVER analyze non-automotive content
-- NEVER guess meaning of unrelated images
-- NEVER force decision on non-car topics
-- NEVER answer outside domain
-- ALWAYS reject out-of-scope immediately
-
-══════════════════════════════════════
-🎯 FINAL GOAL
-══════════════════════════════════════
-- Be a strict automotive decision mechanic
-- Avoid hallucinating outside domain
-- Give fast BUY / NEGOTIATE / AVOID decisions only for vehicles
-`;
-
-const SYSTEM_PROMPT_ANALYZE = `
-You are MechAI — a senior automotive mechanic and vehicle inspection expert from Texas.
-
-══════════════════════════════════════
-🎯 CORE ROLE
-══════════════════════════════════════
-You are NOT a general assistant.
-
-You are a professional garage mechanic specialized ONLY in visual vehicle inspection.
-
-Your only task:
-Analyze car images and evaluate the vehicle condition based strictly on what is visible.
-
-You do NOT:
-- answer text-only questions
-- discuss general topics
-- provide unrelated advice
-
-If there is no image, respond:
-"Sorry buddy, I only inspect vehicles through photos."
-
-══════════════════════════════════════
-📸 PRIMARY TASK — IMAGE INSPECTION
-══════════════════════════════════════
-When an image is provided, you must:
-
-1. Carefully examine every visible detail:
-   - body condition (scratches, dents, rust, paint damage)
-   - lights, glass, mirrors
-   - wheels and tires
-   - suspension stance (if visible)
-   - interior condition (if visible)
-   - engine bay (if visible)
-   - any leaks, cracks, broken parts
-   - signs of repainting or replaced panels
-
-2. Detect both:
-   - obvious damage
-   - subtle signs of wear or hidden issues
-
-3. Actively look for fraud indicators:
-   - inconsistent panel gaps
-   - mismatched paint shades
-   - fresh paint over old damage
-   - water damage signs (stains, corrosion patterns, mold, fogging)
-   - signs of flooding (flood cars / “water-damaged vehicles”)
-   - tampered or replaced parts
-   - signs of accident cover-up or cheap repair jobs
-   - odometer or interior mismatch vs exterior condition
-
-══════════════════════════════════════
-🚨 FRAUD / HIDDEN DAMAGE DETECTION
-══════════════════════════════════════
-You MUST treat every vehicle as potentially suspicious until proven otherwise.
-
-Pay special attention to:
-- Flood / water-damaged vehicles (VERY IMPORTANT)
-- Accident-repaired cars
-- Repainted or resold damaged vehicles
-- Cosmetic masking of structural damage
-
-If you suspect fraud or hidden damage:
-- clearly say it
-- explain why based on visible clues
-- describe what might be hidden underneath
-
-Never ignore suspicious signs.
-
-══════════════════════════════════════
-⚠️ DAMAGE CLASSIFICATION (MANDATORY)
-══════════════════════════════════════
-After inspection, assign ONE final condition level:
-
-- 🟢 LOW DAMAGE
-  Minor wear, cosmetic issues only, no serious concerns
-
-- 🟡 MEDIUM DAMAGE
-  Noticeable issues, possible repairs needed, may affect comfort or reliability
-
-- 🔴 SEVERE DAMAGE
-  Major problems, likely structural/mechanical concerns, risky purchase
-
-- 🔥 EXTREME / CRITICAL DAMAGE ("AWFUL")
-  Unsafe, heavily damaged, flood/accident-prone, or not worth buying
-
-══════════════════════════════════════
-🧠 REQUIRED OUTPUT STRUCTURE
-══════════════════════════════════════
-Always respond in this format:
-
-1. 🔍 Visual Observation
-Describe exactly what is visible in the image
-
-2. 🧠 Inspection Findings
-Explain mechanical or structural meaning
-
-3. 🚨 Fraud / Hidden Damage Check
-- suspicious signs
-- possible hidden problems
-- flood/accident indicators (if any)
-
-4. ⚠️ Risk Analysis
-- safety risks
-- mechanical risks
-- financial risks
-- long-term consequences
-
-5. 💥 Owner Impact
-Explain real-world impact on:
-- driving
-- safety
-- reliability
-- repair cost
-
-6. 📊 FINAL VERDICT
-Choose one:
-LOW DAMAGE / MEDIUM DAMAGE / SEVERE DAMAGE / EXTREME DAMAGE
-
-Explain why clearly.
-
-══════════════════════════════════════
-🧢 TEXAS MECHANIC STYLE
-══════════════════════════════════════
-Speak like a Texas garage mechanic:
-
-- direct, honest, experienced tone
-- slightly rough but not exaggerated
-- occasional slang:
-  "buddy", "listen here", "I’ve seen this before", "that’s not looking good", "this one’s been through it"
-
-Examples:
-- "Yeah buddy, that paint don’t look factory anymore."
-- "I’ve seen flood cars like this before… and they usually hide more than they show."
-- "This one’s been patched up, but not in a good way."
-
-══════════════════════════════════════
-🌐 LANGUAGE RULE (IMPORTANT)
-══════════════════════════════════════
-You must ALWAYS respond in the same language that the user uses in their message.
-
-- If the user writes in Russian → respond in Russian
-- If the user writes in English → respond in English
-- If the user writes in German → respond in German
-- If the user mixes languages → respond in the dominant language of the message
-
-You MUST NOT switch languages unless the user changes language first.
-
-Do not translate unless explicitly asked.
-
-══════════════════════════════════════
-❌ STRICT RULES
-══════════════════════════════════════
-- ONLY analyze images
-- DO NOT answer unrelated questions
-- DO NOT guess without visual evidence
-- DO NOT hallucinate hidden damage without any signs
-- DO NOT act like a general AI assistant
-
-══════════════════════════════════════
-🎯 FINAL GOAL
-══════════════════════════════════════
-Your mission is:
-Give a brutally honest visual inspection of the vehicle,
-detect possible fraud or hidden damage,
-identify flood or accident cars when visible,
-and classify the vehicle condition clearly so the user avoids bad purchases.
-`;
 // ───────────────── STATE ─────────────────
 
 const visibleMessages = ref<Message[]>([
   {
     role: "ai",
-    text: "# MechAi Online\n\nUpload ingredients or ask for a meal plan.",
+    text: "# MechAi Online\n\n I wait you mate.",
   },
 ]);
 
@@ -393,11 +47,6 @@ const selectedImage = ref<string | null>(null);
 const messagesRef = ref<HTMLElement | null>(null);
 
 // ───────────────── HELPERS ─────────────────
-
-function renderMarkdown(text: string): string {
-  const raw = marked.parse(text) as string;
-  return DOMPurify.sanitize(raw);
-}
 
 async function scrollToBottom() {
   await nextTick();
@@ -680,15 +329,27 @@ onMounted(() => {
 </template>
 
 <style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;800&family=Rajdhani:wght@400;500;600;700&family=Noto+Sans:wght@400;500;700&display=swap");
+
+/* PAGE */
+
 .chat-page {
   min-height: 100vh;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at top, #12232d 0%, #081018 60%);
+
+  padding: 20px;
+
   overflow: hidden;
   position: relative;
-  padding: 20px;
+
+  background: radial-gradient(circle at top, #12232d 0%, #081018 60%);
+
+  font-family: "Rajdhani", "Noto Sans", sans-serif;
+
+  letter-spacing: 0.03em;
 }
 
 /* GRID */
@@ -709,13 +370,17 @@ onMounted(() => {
 /* WINDOW */
 
 .chat-window {
-  width: min(900px, 100%);
+  width: min(920px, 100%);
   height: 88vh;
 
   display: flex;
   flex-direction: column;
 
   position: relative;
+
+  overflow: hidden;
+
+  border-radius: 24px;
 
   background: linear-gradient(
     145deg,
@@ -730,16 +395,12 @@ onMounted(() => {
   box-shadow:
     0 0 60px rgba(0, 216, 255, 0.08),
     inset 0 0 30px rgba(0, 0, 0, 0.7);
-
-  overflow: hidden;
-
-  border-radius: 22px;
 }
 
 /* HEADER */
 
 .chat-header {
-  padding: 20px 24px;
+  padding: 22px 24px;
 
   display: flex;
   justify-content: space-between;
@@ -751,26 +412,42 @@ onMounted(() => {
 .title {
   color: #e6fbff;
 
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
 
-  letter-spacing: 0.08em;
+  font-family: "Orbitron", "Noto Sans", sans-serif;
+
+  letter-spacing: 0.16em;
+
+  text-shadow:
+    0 0 12px rgba(0, 216, 255, 0.45),
+    0 0 22px rgba(0, 216, 255, 0.2);
 }
 
 .subtitle {
-  margin-top: 4px;
+  margin-top: 6px;
 
   color: rgba(230, 251, 255, 0.55);
 
   font-size: 12px;
+
+  font-family: "Rajdhani", "Noto Sans", sans-serif;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
 }
 
 .mode {
   color: #ff9f43;
 
-  font-size: 11px;
+  font-size: 12px;
+
+  font-family: "Orbitron", "Noto Sans", sans-serif;
 
   letter-spacing: 0.24em;
+
+  text-shadow: 0 0 12px rgba(255, 159, 67, 0.35);
 }
 
 /* BODY */
@@ -783,7 +460,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
 
-  gap: 16px;
+  gap: 18px;
 
   padding: 24px;
 }
@@ -805,43 +482,81 @@ onMounted(() => {
 .message-bubble {
   max-width: 78%;
 
-  padding: 14px 16px;
+  padding: 16px 18px;
 
   border-radius: 18px;
 
-  line-height: 1.6;
+  line-height: 1.75;
+
+  font-size: 16px;
+
+  font-family: "Rajdhani", "Noto Sans", sans-serif;
+
+  backdrop-filter: blur(8px);
 }
 
-.message-row.ai .message-bubble {
-  background: rgba(0, 216, 255, 0.06);
+/* AI MESSAGE */
 
-  border: 1px solid rgba(0, 216, 255, 0.12);
+.message-row.ai .message-bubble {
+  background: linear-gradient(
+    145deg,
+    rgba(0, 216, 255, 0.08),
+    rgba(0, 216, 255, 0.03)
+  );
+
+  border: 1px solid rgba(0, 216, 255, 0.16);
 
   color: #e6fbff;
 
   border-bottom-left-radius: 4px;
+
+  box-shadow:
+    0 0 24px rgba(0, 216, 255, 0.06),
+    inset 0 0 20px rgba(0, 216, 255, 0.03);
 }
 
-.message-row.user .message-bubble {
-  background: rgba(255, 159, 67, 0.12);
+/* USER MESSAGE */
 
-  border: 1px solid rgba(255, 159, 67, 0.16);
+.message-row.user .message-bubble {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 159, 67, 0.14),
+    rgba(255, 159, 67, 0.08)
+  );
+
+  border: 1px solid rgba(255, 159, 67, 0.22);
 
   color: #fff4e8;
 
   border-bottom-right-radius: 4px;
+
+  box-shadow:
+    0 0 18px rgba(255, 159, 67, 0.08),
+    inset 0 0 12px rgba(255, 159, 67, 0.05);
 }
 
 /* IMAGE */
 
 .message-image {
-  width: 220px;
-
-  border-radius: 12px;
+  width: 240px;
 
   display: block;
 
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(0, 216, 255, 0.14);
+
+  box-shadow: 0 0 18px rgba(0, 216, 255, 0.08);
+}
+
+/* USER TEXT */
+
+.user-text {
+  white-space: pre-wrap;
+
+  word-break: break-word;
 }
 
 /* INPUT */
@@ -849,11 +564,11 @@ onMounted(() => {
 .chat-input {
   padding: 18px;
 
-  border-top: 1px solid rgba(0, 216, 255, 0.08);
-
   display: flex;
   gap: 12px;
   align-items: flex-end;
+
+  border-top: 1px solid rgba(0, 216, 255, 0.08);
 }
 
 /* TEXTAREA */
@@ -866,25 +581,39 @@ onMounted(() => {
   min-height: 52px;
   max-height: 180px;
 
-  background: rgba(255, 255, 255, 0.03);
-
-  border: 1px solid rgba(0, 216, 255, 0.12);
+  padding: 14px 16px;
 
   border-radius: 14px;
 
-  padding: 14px;
+  border: 1px solid rgba(0, 216, 255, 0.14);
+
+  background: rgba(255, 255, 255, 0.03);
 
   color: #e6fbff;
 
   outline: none;
 
-  font-size: 14px;
+  font-size: 15px;
 
-  line-height: 1.5;
+  line-height: 1.6;
+
+  transition: 0.25s ease;
+
+  font-family: "Rajdhani", "Noto Sans", sans-serif;
+}
+
+.chat-input textarea::placeholder {
+  color: rgba(230, 251, 255, 0.32);
+
+  letter-spacing: 0.04em;
 }
 
 .chat-input textarea:focus {
-  border-color: rgba(0, 216, 255, 0.35);
+  border-color: rgba(0, 216, 255, 0.45);
+
+  box-shadow:
+    0 0 0 1px rgba(0, 216, 255, 0.2),
+    0 0 18px rgba(0, 216, 255, 0.12);
 }
 
 /* BUTTONS */
@@ -900,7 +629,11 @@ onMounted(() => {
   cursor: pointer;
 
   transition: 0.25s ease;
+
+  font-family: "Orbitron", "Noto Sans", sans-serif;
 }
+
+/* UPLOAD BUTTON */
 
 .upload-btn {
   width: 52px;
@@ -910,28 +643,42 @@ onMounted(() => {
   color: #00d8ff;
 
   font-size: 22px;
+
+  box-shadow:
+    0 0 12px rgba(0, 216, 255, 0.08),
+    inset 0 0 10px rgba(0, 216, 255, 0.03);
 }
 
 .upload-btn:hover {
   background: rgba(0, 216, 255, 0.16);
+
+  transform: translateY(-1px);
 }
 
-.send-btn {
-  min-width: 110px;
+/* SEND BUTTON */
 
-  background: #ff9f43;
+.send-btn {
+  min-width: 120px;
+
+  background: linear-gradient(135deg, #ff9f43, #ffb15e);
 
   color: #091016;
 
-  font-weight: 700;
+  font-weight: 800;
 
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
+
+  box-shadow:
+    0 0 20px rgba(255, 159, 67, 0.22),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.18);
 }
 
 .send-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 
-  background: #ffb15e;
+  box-shadow:
+    0 0 28px rgba(255, 159, 67, 0.35),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.22);
 }
 
 .send-btn:disabled {
@@ -954,6 +701,8 @@ onMounted(() => {
   border-radius: 14px;
 
   border: 1px solid rgba(0, 216, 255, 0.16);
+
+  box-shadow: 0 0 20px rgba(0, 216, 255, 0.08);
 }
 
 .remove-preview {
@@ -984,9 +733,9 @@ onMounted(() => {
 
   padding: 14px 18px;
 
-  background: rgba(0, 216, 255, 0.06);
-
   border-radius: 14px;
+
+  background: rgba(0, 216, 255, 0.06);
 }
 
 .typing span {
@@ -1010,39 +759,124 @@ onMounted(() => {
 
 /* MARKDOWN */
 
+:deep(.markdown-body) {
+  font-family: "Rajdhani", "Noto Sans", sans-serif;
+
+  color: #dff9ff;
+
+  line-height: 1.8;
+
+  font-size: 16px;
+}
+
 :deep(.markdown-body h1),
 :deep(.markdown-body h2),
-:deep(.markdown-body h3) {
-  margin: 10px 0 6px;
+:deep(.markdown-body h3),
+:deep(.markdown-body h4) {
+  margin: 18px 0 10px;
 
-  color: white;
+  font-family: "Orbitron", "Noto Sans", sans-serif;
+
+  color: #ffffff;
+
+  letter-spacing: 0.06em;
+
+  text-shadow: 0 0 10px rgba(0, 216, 255, 0.18);
+}
+
+:deep(.markdown-body h1) {
+  font-size: 28px;
+}
+
+:deep(.markdown-body h2) {
+  font-size: 22px;
+}
+
+:deep(.markdown-body h3) {
+  font-size: 18px;
 }
 
 :deep(.markdown-body p) {
-  margin: 0 0 8px;
+  margin-bottom: 12px;
+
+  color: rgba(230, 251, 255, 0.92);
+}
+
+:deep(.markdown-body strong) {
+  color: #ffffff;
+
+  font-weight: 700;
 }
 
 :deep(.markdown-body ul),
 :deep(.markdown-body ol) {
-  padding-left: 18px;
+  padding-left: 22px;
+
+  margin-bottom: 14px;
+}
+
+:deep(.markdown-body li) {
+  margin-bottom: 6px;
+}
+
+:deep(.markdown-body blockquote) {
+  margin: 14px 0;
+
+  padding: 12px 16px;
+
+  border-left: 3px solid rgba(0, 216, 255, 0.4);
+
+  background: rgba(255, 255, 255, 0.03);
+
+  border-radius: 10px;
+
+  color: rgba(230, 251, 255, 0.82);
 }
 
 :deep(.markdown-body code) {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 216, 255, 0.08);
 
-  padding: 2px 5px;
+  color: #7ee7ff;
 
-  border-radius: 4px;
+  padding: 3px 7px;
+
+  border-radius: 6px;
+
+  font-size: 14px;
+
+  font-family: "JetBrains Mono", monospace;
 }
 
 :deep(.markdown-body pre) {
   overflow-x: auto;
 
-  padding: 10px;
+  padding: 16px;
 
-  border-radius: 10px;
+  border-radius: 14px;
 
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.42);
+
+  border: 1px solid rgba(0, 216, 255, 0.08);
+
+  box-shadow: inset 0 0 20px rgba(0, 216, 255, 0.03);
+}
+
+:deep(.markdown-body pre code) {
+  background: transparent;
+
+  padding: 0;
+
+  color: #dff9ff;
+}
+
+:deep(.markdown-body a) {
+  color: #5de2ff;
+
+  text-decoration: none;
+}
+
+:deep(.markdown-body a:hover) {
+  text-decoration: underline;
 }
 
 /* LOADER */
@@ -1051,12 +885,12 @@ onMounted(() => {
   width: 18px;
   height: 18px;
 
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  border-top-color: black;
-
   border-radius: 50%;
 
   display: inline-block;
+
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: black;
 
   animation: spin 1s linear infinite;
 }
