@@ -169,8 +169,8 @@ async function sendMessage() {
 
     // MODEL
 
-    const model = "openai/gpt-5.4-nano";
-
+    // const model = "openai/gpt-5.4-nano";
+    const model = "qwen/qwen2.5-vl-72b-instruct";
     // STREAM
 
     const stream = await openai.chat.completions.create({
