@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, computed, onMounted } from "vue";
+import { ref, nextTick, computed, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import OpenAI from "openai";
 import { imageToBase64 } from "../../../features/ai";
@@ -42,7 +42,7 @@ const inputVal = ref("");
 
 const fileInput = ref<HTMLInputElement | null>(null);
 
-const selectedImage = ref<string | null>(null);
+const selectedImages = reactive<{ image: string }[]>([]);
 
 const messagesRef = ref<HTMLElement | null>(null);
 
@@ -64,42 +64,45 @@ function triggerFileInput() {
 }
 
 function handleFileChange(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const files = (event.target as HTMLInputElement).files;
 
-  if (!file) return;
+  if (!files) return;
 
-  selectedImage.value = URL.createObjectURL(file);
+  for (const file of files) {
+    const img = URL.createObjectURL(file);
+    selectedImages.push({ image: img });
+  }
 }
 
 function clearImage() {
-  if (selectedImage.value) {
-    URL.revokeObjectURL(selectedImage.value);
+  if (selectedImages) {
+    selectedImages.length = 0;
   }
+}
 
-  selectedImage.value = null;
-
-  if (fileInput.value) {
-    fileInput.value.value = "";
-  }
+function removeImage(index: number) {
+  selectedImages.splice(index, 1);
 }
 
 // ───────────────── SEND MESSAGE ─────────────────
 
 async function sendMessage() {
   const text = inputVal.value.trim();
-  const file = fileInput.value?.files?.[0];
+  const files = fileInput.value?.files;
 
-  if ((!text && !file) || typing.value) return;
+  if ((!text && !files) || typing.value) return;
 
   inputVal.value = "";
 
   // USER MESSAGE
 
-  visibleMessages.value.push({
-    role: "user",
-    text,
-    image: selectedImage.value ?? undefined,
-  });
+  for (const img of selectedImages) {
+    visibleMessages.value.push({
+      role: "user",
+      text,
+      image: img.image ?? undefined,
+    });
+  }
 
   await scrollToBottom();
 
@@ -147,24 +150,26 @@ async function sendMessage() {
 
     // CURRENT MESSAGE WITH IMAGE
 
-    if (file) {
-      const base64 = await imageToBase64(file);
+    if (files) {
+      for (const file of files) {
+        const base64 = await imageToBase64(file);
 
-      messages.push({
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: text || "Analyze this image",
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: base64,
+        messages.push({
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: text || "Analyze this image",
             },
-          },
-        ],
-      });
+            {
+              type: "image_url",
+              image_url: {
+                url: base64,
+              },
+            },
+          ],
+        });
+      }
     }
 
     // MODEL
@@ -290,10 +295,16 @@ onMounted(() => {
       </div>
 
       <!-- PREVIEW -->
-      <div v-if="selectedImage" class="preview-wrapper">
-        <img :src="selectedImage" class="preview-image" />
+      <div v-if="selectedImages">
+        <div
+          v-for="(img, index) in selectedImages"
+          :key="index"
+          class="preview-wrapper"
+        >
+          <img :src="img.image" class="preview-image" />
 
-        <button class="remove-preview" @click="clearImage">✕</button>
+          <button class="remove-preview" @click="removeImage(index)">✕</button>
+        </div>
       </div>
 
       <!-- INPUT -->
@@ -305,6 +316,7 @@ onMounted(() => {
           ref="fileInput"
           type="file"
           accept="image/*"
+          multiple
           hidden
           @change="handleFileChange"
         />
